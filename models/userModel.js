@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-
 const Schema = mongoose.Schema;
 const validator = require('validator');
 const bcrypt = require('bcrypt');
@@ -15,12 +14,7 @@ const userSchema = new Schema({
     required: [true, 'Please provide your email'],
     unique: true,
     lowercase: true,
-    // validate: {
-    //     validator: function(email){
-    //         return /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/.test(email)
-    //     },
-    //     message: "Not a valid email address"
-    // }
+
     validate: {
       validator: email => validator.isEmail(email),
       message: 'Please provide a valid email'
@@ -56,7 +50,8 @@ const userSchema = new Schema({
   },
 
   passwordChangedAt: {
-    type: Date
+    type: Date,
+    select: false
   },
   passwordResetToken: String,
   passwordResetExpires: Date
@@ -71,11 +66,6 @@ userSchema.pre('save', async function(next) {
 });
 
 userSchema.pre('save', function(next) {
-  // if(this.isModified("password") && !this.isNew ){
-  //     this.passwordChangedAt = Date.now()
-  // }
-  // next()
-
   if (!this.isModified('password') || this.isNew) return next();
 
   this.passwordChangedAt = Date.now() - 1000;
