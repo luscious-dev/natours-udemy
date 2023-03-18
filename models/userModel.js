@@ -78,7 +78,7 @@ userSchema.pre('save', function(next) {
 });
 
 userSchema.pre(/^find/, function(next) {
-  this.find({ active: true });
+  this.find({ active: { $ne: false } });
   next();
 });
 
@@ -113,8 +113,6 @@ userSchema.methods.createResetToken = function() {
     .update(resetToken)
     .digest('hex');
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
-  console.log({ resetToken }, this.passwordResetToken);
 
   return resetToken;
 };
