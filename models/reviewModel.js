@@ -34,6 +34,9 @@ const reviewSchema = new Schema(
   }
 );
 
+// To enforce that each user only makes one review on a tour
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 reviewSchema.pre(/^find/, function(next) {
   this.populate({
     path: 'user',
