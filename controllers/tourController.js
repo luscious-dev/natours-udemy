@@ -1,3 +1,4 @@
+const AppError = require('../utils/appError');
 const Tour = require('./../models/tourModel');
 // const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
@@ -98,3 +99,36 @@ exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);
+
+// /tours-within/:distance/center/:latlng/unit/:unit
+// /tours-within/233/center/9.0658421,7.4706454/unit/mi
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitude and longitude in the format lat,lng',
+        400
+      )
+    );
+  }
+
+  // Mongodb expects our radius to be in radians. To get the radians, we divide our radius by the radius of the earth
+
+  // This query is trying to get the Tours located within a certain distance from a point
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } }
+  });
+
+  res.status(200).json({
+    message: 'success',
+    results: tours.length,
+    data: {
+      data: tours
+    }
+  });
+});
