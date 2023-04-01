@@ -132,3 +132,50 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+  if (!lat || !lng) {
+    return next(
+      new AppError(
+        'Please provide latitude and longitude in the format lat,lng',
+        400
+      )
+    );
+  }
+  const distances = await Tour.aggregate([
+    {
+      // Must be the first stage in the pipeline
+      // You must also have an index on the geo field
+      // If there is only one field with an index, then it is used by default. But if there are multiple, then you need to specify in the "key" attribute
+      $geoNear: {
+        // this is the point from which we want to start our calculations from
+        near: {
+          type: 'Point',
+          coordinates: [lng * 1, lat * 1]
+        },
+        // This is the name of the field that will be created and all the calculated distances will be stored
+        distanceField: 'distance',
+        distanceMultiplier: multiplier // dividing by 1000 to convert to km
+      }
+    },
+    {
+      $project: {
+        distance: 1,
+        name: 1
+      }
+    }
+  ]);
+
+  res.status(200).json({
+    message: 'success',
+    results: distances.length,
+    data: {
+      data: distances
+    }
+  });
+});
