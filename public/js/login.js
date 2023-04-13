@@ -1,6 +1,7 @@
-const form = document.querySelector('.form');
+import axios from 'axios';
+import { showAlert } from './alert';
 
-function login(email, password) {
+export const login = function(email, password) {
   return axios
     .post('http://localhost:3000/api/v1/users/login', {
       email,
@@ -8,21 +9,12 @@ function login(email, password) {
     })
     .then(res => {
       console.log(res);
-      alert('Logged in successfully!');
+      showAlert('success', 'Logged in successfully!');
       window.setTimeout(() => {
         location.assign('/');
       }, 1500);
     })
     .catch(err => {
-      console.log(err);
-      alert(err.response.data.message);
+      showAlert('error', err.response.data.message);
     });
-}
-
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  const email = document.querySelector('.form__input[type=email]');
-  const password = document.querySelector('.form__input[type=password]');
-
-  await login(email.value, password.value);
-});
+};
