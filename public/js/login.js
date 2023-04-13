@@ -8,9 +8,14 @@ function login(email, password) {
     })
     .then(res => {
       console.log(res);
+      alert('Logged in successfully!');
+      window.setTimeout(() => {
+        location.assign('/');
+      }, 1500);
     })
     .catch(err => {
       console.log(err);
+      alert(err.response.data.message);
     });
 }
 
