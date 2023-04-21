@@ -76,6 +76,7 @@ app.use('/api', limiter);
 // File limit implemented
 app.use(cookieParser());
 app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Data Sanitization against NoSql query injection
 app.use(mongoSanitize());

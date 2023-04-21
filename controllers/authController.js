@@ -119,6 +119,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
+  res.locals.user = currentUser;
   next();
 });
 
@@ -249,8 +250,9 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   }
 
   // 2. Check if POSTed current password is correct
-  const { currentPassword, password, passwordConfirm } = req.body;
-  const isCorrect = await user.correctPassword(currentPassword, user.password);
+  const { passwordCurrent, password, passwordConfirm } = req.body;
+  const isCorrect = await user.correctPassword(passwordCurrent, user.password);
+
   if (!isCorrect) {
     return next(new AppError('Incorrect password', 401));
   }
